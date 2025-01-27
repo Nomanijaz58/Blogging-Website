@@ -1,37 +1,24 @@
-name: PR Validation
-
+name: wf-linting-build-jobs
 on:
   pull_request:
     branches:
       - develop
-
 jobs:
-  lint:
-    name: Lint Code
+  linting-job:
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
-
-      - name: Install Dependencies
-        run: |
-          npm install -g htmlhint stylelint
-
-      - name: Lint HTML Files
-        run: htmlhint src/*/.html
-
+    steps: 
+      - name: checkout repository
+        uses: actions/checkout@v4
+      - name: Lint HTML files
+        run: npx htmlhint "**/*.html"
       - name: Lint CSS Files
-        run: stylelint "styles/*/.css"
-
-  build:
-    name: Build Project
+        run: npx stylelint "**/*.css"
+  build-job:
+    needs: linting-job
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
-
-      - name: Install Parcel
-        run: npm install -g parcel-bundler
-
-      - name: Build Static Website
-        run: parcel build src/*.html
+      - name: checkout repository
+        uses: actions/checkout@v4
+      - name: Build with Parcel
+        run:
+          npx parcel build "./src/index.html" --dist-dir "./dev" --public-url "./"
